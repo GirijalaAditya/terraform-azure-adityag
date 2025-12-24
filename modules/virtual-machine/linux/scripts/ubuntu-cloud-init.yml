@@ -1,0 +1,32 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - curl
+  - wget
+  - tree
+  - zip
+  - unzip
+  - jq
+  - git
+  - apt-transport-https
+  - software-properties-common
+  - iputils-ping
+  - net-tools
+  - inetutils-traceroute
+bootcmd:
+  - mkdir -p /etc/systemd/system/walinuxagent.service.d
+  - echo "[Unit]\nAfter=cloud-final.service" > /etc/systemd/system/walinuxagent.service.d/override.conf
+  - sed "s/After=multi-user.target//g" /lib/systemd/system/cloud-final.service > /etc/systemd/system/cloud-final.service
+  - systemctl daemon-reload
+runcmd:
+  - curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh ./get-docker.sh
+  - curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  - curl -sL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | sudo bash && sudo install -o root -g root -m 0755 kustomize /usr/local/bin/kustomize
+  - curl -sL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | sudo bash 
+  - curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+  - curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+  - sudo az aks install-cli
+  - source /etc/os-release && wget -q https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb && sudo dpkg -i packages-microsoft-prod.deb && rm packages-microsoft-prod.deb && sudo apt update -y && sudo apt install -y powershell
+groups:
+  - docker

@@ -1,0 +1,9 @@
+variable "environment" {
+  description = "Environment"
+  type        = string
+}
+
+variable "business_divsion" {
+  description = "Business Division"
+  type        = string
+}
